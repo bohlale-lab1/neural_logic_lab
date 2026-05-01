@@ -27,7 +27,7 @@ let users = {
         { id: 'A001', name: 'Admin User', password: '1234', role: 'admin', email: 'bohlaleramoloto@gmail.com' }
     ],
     students: [
-        { id: 'S001', student_number: 202394726, name: 'CN MALULEKE', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramolotogmail.com' },
+        { id: 'S001', student_number: 202394726, name: 'CN MALULEKE', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramoloto@gmail.com' },
         { id: 'S002', student_number: 202393020, name: 'BZ TWALA', password: '1234', accessibility: 'VISUAL_IMPAIRMENT', is_active: true, email: 'bohlaleramoloto@gmail.com' },
         { id: 'S003', student_number: 240015914, name: 'TM SEKGOBELA', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramoloto@gmail.com' },
         { id: 'S004', student_number: 202247479, name: 'C SETE', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramoloto@gmail.com' },
@@ -57,6 +57,60 @@ function speakText(text) {
     }
 }
 
+// ========== DUPLICATE CHECK FUNCTIONS ==========
+
+// Check if student already exists (by student number OR email)
+function checkDuplicateStudent(studentNumber, email, excludeId = null) {
+    const existingByNumber = users.students.find(s => s.student_number === parseInt(studentNumber) && s.id !== excludeId);
+    const existingByEmail = users.students.find(s => s.email === email && s.id !== excludeId);
+    
+    return { 
+        isDuplicate: existingByNumber || existingByEmail,
+        byNumber: existingByNumber,
+        byEmail: existingByEmail,
+        message: existingByNumber ? `Student with number ${studentNumber} already exists: ${existingByNumber.name}` : 
+                  existingByEmail ? `Student with email ${email} already exists: ${existingByEmail.name}` : null
+    };
+}
+
+// Check if guard already exists (by badge number OR email)
+function checkDuplicateGuard(badgeNumber, email, excludeId = null) {
+    const existingByBadge = users.guards.find(g => g.id === badgeNumber && g.id !== excludeId);
+    const existingByEmail = users.guards.find(g => g.email === email && g.id !== excludeId);
+    
+    return { 
+        isDuplicate: existingByBadge || existingByEmail,
+        byBadge: existingByBadge,
+        byEmail: existingByEmail,
+        message: existingByBadge ? `Guard with badge ${badgeNumber} already exists: ${existingByBadge.name}` : 
+                  existingByEmail ? `Guard with email ${email} already exists: ${existingByEmail.name}` : null
+    };
+}
+
+// Show existing student details
+function showExistingStudentDetails(student) {
+    const message = `⚠️ STUDENT ALREADY REGISTERED!\n\n` +
+                    `📚 Student Number: ${student.student_number}\n` +
+                    `👤 Name: ${student.name}\n` +
+                    `📧 Email: ${student.email}\n` +
+                    `👁️ Accessibility: ${student.accessibility === 'VISUAL_IMPAIRMENT' ? 'Visually Impaired' : 'None'}\n` +
+                    `✅ Status: ${student.is_active ? 'Active' : 'Inactive'}\n\n` +
+                    `🔄 To update, delete the existing student first.`;
+    alert(message);
+}
+
+// Show existing guard details
+function showExistingGuardDetails(guard) {
+    const message = `⚠️ GUARD ALREADY REGISTERED!\n\n` +
+                    `🎖️ Badge Number: ${guard.id}\n` +
+                    `👤 Name: ${guard.name}\n` +
+                    `📧 Email: ${guard.email}\n` +
+                    `🚪 Gate: ${guard.gate}\n` +
+                    `✅ Status: ${guard.is_active !== false ? 'Active' : 'Inactive'}\n\n` +
+                    `🔄 To update, delete the existing guard first.`;
+    alert(message);
+}
+
 // ========== FIXED BARCODE SCANNER ==========
 async function startCamera() {
     console.log("Starting camera...");
@@ -74,7 +128,6 @@ async function startCamera() {
         document.getElementById('scanStatus').innerHTML = '📷 Camera active - scanning...';
         console.log("Camera started, scanning for barcodes...");
         
-        // Start scanning every 500ms
         if (scanInterval) clearInterval(scanInterval);
         scanInterval = setInterval(() => scanForBarcode(), 500);
         
@@ -91,14 +144,12 @@ async function scanForBarcode() {
     const video = document.getElementById('video');
     if (!video.videoWidth || !video.videoHeight) return;
     
-    // Create a canvas to capture the current video frame
     const canvas = document.createElement('canvas');
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
-    // Try to detect barcode using BarcodeDetector API
     if ('BarcodeDetector' in window) {
         try {
             const detector = new BarcodeDetector({ 
@@ -412,7 +463,8 @@ async function sendResetPin() {
             time: new Date().toLocaleTimeString()
         };
         
-        await emailjs.send(service_0nxc2qy, template_0y9wskc, templateParams);
+        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+        
         successDiv.innerHTML = `✓ Verification PIN sent to ${email}. Please check your inbox.`;
         successDiv.style.display = 'block';
         
@@ -421,7 +473,6 @@ async function sendResetPin() {
         document.getElementById('resetPin').value = '';
     } catch (err) {
         console.error('Email error:', err);
-        // Show pin for demo purposes
         successDiv.innerHTML = `⚠️ Demo mode. Your PIN is: ${pin}`;
         successDiv.style.display = 'block';
         document.getElementById('step1Container').style.display = 'none';
@@ -550,18 +601,36 @@ function showAdminTab(tab) {
     if (tab === 'alerts') renderPendingAlerts();
 }
 
+// ========== REGISTER STUDENT (WITH DUPLICATE CHECK) ==========
 function registerStudent() {
     const studentNumber = document.getElementById('newStudentNumber').value;
     const name = document.getElementById('newStudentName').value;
     const email = document.getElementById('newStudentEmail').value;
     const password = document.getElementById('newStudentPassword').value;
     const accessibility = document.getElementById('newAccessibility').value;
+    const messageDiv = document.getElementById('studentRegMessage');
     
     if (!studentNumber || !name || !email || !password) {
-        document.getElementById('studentRegMessage').innerHTML = '<span style="color:red">Fill all fields</span>';
+        messageDiv.innerHTML = '<span style="color:red">❌ Fill all fields</span>';
         return;
     }
     
+    // Check for duplicates
+    const duplicateCheck = checkDuplicateStudent(studentNumber, email);
+    
+    if (duplicateCheck.isDuplicate) {
+        // Show existing student details
+        showExistingStudentDetails(duplicateCheck.isDuplicate);
+        messageDiv.innerHTML = `<span style="color:orange">⚠️ Student already exists! Check details below.</span>`;
+        
+        // Optionally fill the form with existing details for editing
+        document.getElementById('newStudentName').value = duplicateCheck.isDuplicate.name;
+        document.getElementById('newStudentEmail').value = duplicateCheck.isDuplicate.email;
+        document.getElementById('newAccessibility').value = duplicateCheck.isDuplicate.accessibility;
+        return;
+    }
+    
+    // Create new student if no duplicate
     const newStudent = {
         id: 'S' + String(users.students.length + 1).padStart(3, '0'),
         student_number: parseInt(studentNumber),
@@ -573,16 +642,70 @@ function registerStudent() {
     };
     users.students.push(newStudent);
     
-    document.getElementById('studentRegMessage').innerHTML = '<span style="color:green">✓ Student registered!</span>';
+    messageDiv.innerHTML = '<span style="color:green">✅ Student registered successfully!</span>';
+    
+    // Clear form
     document.getElementById('newStudentNumber').value = '';
     document.getElementById('newStudentName').value = '';
     document.getElementById('newStudentEmail').value = '';
     document.getElementById('newStudentPassword').value = '';
+    
     renderStudentsTable();
     populateStudentDropdown();
     updateAdminStats();
 }
 
+// ========== REGISTER GUARD (WITH DUPLICATE CHECK) ==========
+function registerGuard() {
+    const badge = document.getElementById('newGuardBadge').value;
+    const name = document.getElementById('newGuardName').value;
+    const email = document.getElementById('newGuardEmail').value;
+    const password = document.getElementById('newGuardPassword').value;
+    const gate = document.getElementById('newGuardGate').value;
+    const messageDiv = document.getElementById('guardRegMessage');
+    
+    if (!badge || !name || !email || !password) {
+        messageDiv.innerHTML = '<span style="color:red">❌ Fill all fields</span>';
+        return;
+    }
+    
+    // Check for duplicates
+    const duplicateCheck = checkDuplicateGuard(badge.toUpperCase(), email);
+    
+    if (duplicateCheck.isDuplicate) {
+        // Show existing guard details
+        showExistingGuardDetails(duplicateCheck.isDuplicate);
+        messageDiv.innerHTML = `<span style="color:orange">⚠️ Guard already exists! Check details below.</span>`;
+        
+        // Optionally fill the form with existing details
+        document.getElementById('newGuardName').value = duplicateCheck.isDuplicate.name;
+        document.getElementById('newGuardEmail').value = duplicateCheck.isDuplicate.email;
+        document.getElementById('newGuardGate').value = duplicateCheck.isDuplicate.gate;
+        return;
+    }
+    
+    // Create new guard if no duplicate
+    users.guards.push({ 
+        id: badge.toUpperCase(), 
+        name: name, 
+        password: password, 
+        role: 'guard', 
+        gate: gate, 
+        email: email 
+    });
+    
+    messageDiv.innerHTML = '<span style="color:green">✅ Guard registered successfully!</span>';
+    
+    // Clear form
+    document.getElementById('newGuardBadge').value = '';
+    document.getElementById('newGuardName').value = '';
+    document.getElementById('newGuardEmail').value = '';
+    document.getElementById('newGuardPassword').value = '';
+    
+    renderGuardsTable();
+}
+
+// ========== REGISTER ASSET ==========
 function registerAsset() {
     const barcodeId = document.getElementById('newAssetBarcode').value;
     const assetType = document.getElementById('newAssetType').value;
@@ -616,27 +739,6 @@ function registerAsset() {
     document.getElementById('newAssetSerial').value = '';
     renderAssetsTable();
     updateAdminStats();
-}
-
-function registerGuard() {
-    const badge = document.getElementById('newGuardBadge').value;
-    const name = document.getElementById('newGuardName').value;
-    const email = document.getElementById('newGuardEmail').value;
-    const password = document.getElementById('newGuardPassword').value;
-    const gate = document.getElementById('newGuardGate').value;
-    
-    if (!badge || !name || !email || !password) {
-        document.getElementById('guardRegMessage').innerHTML = '<span style="color:red">Fill all fields</span>';
-        return;
-    }
-    
-    users.guards.push({ id: badge.toUpperCase(), name: name, password: password, role: 'guard', gate: gate, email: email });
-    document.getElementById('guardRegMessage').innerHTML = '<span style="color:green">✓ Guard registered!</span>';
-    document.getElementById('newGuardBadge').value = '';
-    document.getElementById('newGuardName').value = '';
-    document.getElementById('newGuardEmail').value = '';
-    document.getElementById('newGuardPassword').value = '';
-    renderGuardsTable();
 }
 
 function renderStudentsTable() {
@@ -756,7 +858,11 @@ function populateStudentDropdown() {
 }
 
 function deleteStudent(id) {
-    if (confirm('Delete student? Their assets will also be deleted.')) {
+    if (confirm('Delete this student? Their assets will also be deleted.')) {
+        const student = users.students.find(s => s.id === id);
+        if (student) {
+            alert(`Student ${student.name} (${student.student_number}) has been deleted.`);
+        }
         users.students = users.students.filter(s => s.id !== id);
         assets = assets.filter(a => a.student_id !== id);
         renderStudentsTable();
@@ -776,6 +882,10 @@ function deleteAsset(id) {
 
 function deleteGuard(id) {
     if (confirm('Delete this guard?')) {
+        const guard = users.guards.find(g => g.id === id);
+        if (guard) {
+            alert(`Guard ${guard.name} (${guard.id}) has been deleted.`);
+        }
         users.guards = users.guards.filter(g => g.id !== id);
         renderGuardsTable();
     }
@@ -960,3 +1070,4 @@ loadOfflineQueue();
 loadPendingAlerts();
 
 console.log("Script loaded - Barcode scanning is ready!");
+console.log("Duplicate detection is active for Students and Guards!");
