@@ -15,10 +15,10 @@ let selectedRole = 'guard';
 // Test users
 const users = {
     guards: [
-        { id: 'G001', name: 'John Doe', password: '1234', email: 'YOUR_EMAIL@gmail.com' }
+        { id: 'G001', name: 'John Doe', password: '1234', email: 'bohlaleramoloto@gmail.com' }
     ],
     admins: [
-        { id: 'A001', name: 'Admin User', password: '1234', email: 'YOUR_EMAIL@gmail.com' }
+        { id: 'A001', name: 'Admin User', password: '1234', email: 'bohlaleramoloto@gmail.com' }
     ]
 };
 
