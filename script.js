@@ -20,18 +20,18 @@ const assetIcons = { 'LAPTOP': '💻', 'FRIDGE': '🧊', 'MICROWAVE': '🍿', 'O
 // ========== USERS ==========
 let users = {
     guards: [
-        { id: 'G001', name: 'John Doe', password: '1234', role: 'guard', gate: 'GATE_1', email: 'JOHNDOE@gmail.com' },
-        { id: 'G002', name: 'Jane Smith', password: '1234', role: 'guard', gate: 'GATE_2', email:'"janesmith@gmail.com' }
+        { id: 'G001', name: 'John Doe', password: '1234', role: 'guard', gate: 'GATE_1', email: 'bohlaleramoloto@gmail.com' },
+        { id: 'G002', name: 'Jane Smith', password: '1234', role: 'guard', gate: 'GATE_2', email: 'bohlaleramoloto@gmail.com' }
     ],
     admins: [
-        { id: 'A001', name: 'Admin User', password: '1234', role: 'admin', email: 'admin@gmail.com' }
+        { id: 'A001', name: 'Admin User', password: '1234', role: 'admin', email: 'bohlaleramoloto@gmail.com' }
     ],
     students: [
-        { id: 'S001', student_number: 202394726, name: 'CN MALULEKE', password: '1234', accessibility: 'NONE', is_active: true, email: 'cnmaluleke@gmail.com' },
-        { id: 'S002', student_number: 202393020, name: 'BZ TWALA', password: '1234', accessibility: 'VISUAL_IMPAIRMENT', is_active: true, email: 'bztwala@gmail.com' },
-        { id: 'S003', student_number: 240015914, name: 'TM SEKGOBELA', password: '1234', accessibility: 'NONE', is_active: true, email: 'tmsekgobela@gmail.com' },
-        { id: 'S004', student_number: 202247479, name: 'C SETE', password: '1234', accessibility: 'NONE', is_active: true, email: 'csete@gmail.com' },
-        { id: 'S005', student_number: 240000760, name: 'CB RAMOLOTO', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaramoloto@gmail.com' }
+        { id: 'S001', student_number: 202394726, name: 'CN MALULEKE', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramoloto@gmail.com' },
+        { id: 'S002', student_number: 202393020, name: 'BZ TWALA', password: '1234', accessibility: 'VISUAL_IMPAIRMENT', is_active: true, email: 'bohlaleramoloto@gmail.com' },
+        { id: 'S003', student_number: 240015914, name: 'TM SEKGOBELA', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramoloto@gmail.com' },
+        { id: 'S004', student_number: 202247479, name: 'C SETE', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramoloto@gmail.com' },
+        { id: 'S005', student_number: 240000760, name: 'CB RAMOLOTO', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramoloto@gmail.com' }
     ]
 };
 
@@ -84,6 +84,27 @@ function checkDuplicateGuard(badgeNumber, email, excludeId = null) {
         byEmail: existingByEmail,
         message: existingByBadge ? `Guard with badge ${badgeNumber} already exists: ${existingByBadge.name}` : 
                   existingByEmail ? `Guard with email ${email} already exists: ${existingByEmail.name}` : null
+    };
+}
+
+// Check if asset barcode already exists
+function checkDuplicateBarcode(barcodeId, excludeId = null) {
+    const existing = assets.find(a => a.barcode_id === barcodeId.toUpperCase() && a.id !== excludeId);
+    return {
+        isDuplicate: existing !== undefined,
+        asset: existing,
+        message: existing ? `Barcode ${barcodeId} is already registered to: ${existing.student_name}` : null
+    };
+}
+
+// Check if serial number already exists
+function checkDuplicateSerialNumber(serialNumber, excludeId = null) {
+    if (!serialNumber || serialNumber === 'N/A') return { isDuplicate: false, asset: null };
+    const existing = assets.find(a => a.serial_number === serialNumber && a.id !== excludeId);
+    return {
+        isDuplicate: existing !== undefined,
+        asset: existing,
+        message: existing ? `Serial number ${serialNumber} is already registered to: ${existing.student_name}` : null
     };
 }
 
@@ -395,7 +416,7 @@ function handleLogin() {
             updateGuardStats();
             renderGuardRecentScans();
         } else {
-            errorDiv.textContent = 'Invalid badge number or password. Try G001 / 1234';
+            errorDiv.textContent = 'Invalid badge number or password';
             errorDiv.style.display = 'block';
         }
     } else if (selectedRole === 'admin') {
@@ -407,7 +428,7 @@ function handleLogin() {
             loadAdminDashboard();
             showScreen('adminScreen');
         } else {
-            errorDiv.textContent = 'Invalid username or password. Try A001 / 1234';
+            errorDiv.textContent = 'Invalid username or password';
             errorDiv.style.display = 'block';
         }
     }
@@ -554,7 +575,6 @@ function loadAdminDashboard() {
     renderStudentsTable();
     renderAssetsTable();
     renderGuardsTable();
-    renderAdminLogsTable();
     renderGuardReports();
     renderPendingAlerts();
     populateStudentDropdown();
@@ -583,7 +603,8 @@ function updateAdminStats() {
 }
 
 function showAdminTab(tab) {
-    const tabs = ['dashboard', 'students', 'assets', 'alerts', 'scans', 'guards', 'logs'];
+    // Removed 'logs' tab
+    const tabs = ['dashboard', 'students', 'assets', 'alerts', 'scans', 'guards'];
     tabs.forEach(t => {
         const tabEl = document.getElementById(`admin${t.charAt(0).toUpperCase() + t.slice(1)}Tab`);
         const btnEl = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
@@ -596,7 +617,6 @@ function showAdminTab(tab) {
     if (tab === 'students') renderStudentsTable();
     if (tab === 'assets') renderAssetsTable();
     if (tab === 'guards') renderGuardsTable();
-    if (tab === 'logs') renderAdminLogsTable();
     if (tab === 'scans') renderGuardReports();
     if (tab === 'alerts') renderPendingAlerts();
 }
@@ -619,18 +639,14 @@ function registerStudent() {
     const duplicateCheck = checkDuplicateStudent(studentNumber, email);
     
     if (duplicateCheck.isDuplicate) {
-        // Show existing student details
         showExistingStudentDetails(duplicateCheck.isDuplicate);
-        messageDiv.innerHTML = `<span style="color:orange">⚠️ Student already exists! Check details below.</span>`;
-        
-        // Optionally fill the form with existing details for editing
+        messageDiv.innerHTML = `<span style="color:orange">⚠️ Student already exists!</span>`;
         document.getElementById('newStudentName').value = duplicateCheck.isDuplicate.name;
         document.getElementById('newStudentEmail').value = duplicateCheck.isDuplicate.email;
         document.getElementById('newAccessibility').value = duplicateCheck.isDuplicate.accessibility;
         return;
     }
     
-    // Create new student if no duplicate
     const newStudent = {
         id: 'S' + String(users.students.length + 1).padStart(3, '0'),
         student_number: parseInt(studentNumber),
@@ -644,7 +660,6 @@ function registerStudent() {
     
     messageDiv.innerHTML = '<span style="color:green">✅ Student registered successfully!</span>';
     
-    // Clear form
     document.getElementById('newStudentNumber').value = '';
     document.getElementById('newStudentName').value = '';
     document.getElementById('newStudentEmail').value = '';
@@ -669,22 +684,17 @@ function registerGuard() {
         return;
     }
     
-    // Check for duplicates
     const duplicateCheck = checkDuplicateGuard(badge.toUpperCase(), email);
     
     if (duplicateCheck.isDuplicate) {
-        // Show existing guard details
         showExistingGuardDetails(duplicateCheck.isDuplicate);
-        messageDiv.innerHTML = `<span style="color:orange">⚠️ Guard already exists! Check details below.</span>`;
-        
-        // Optionally fill the form with existing details
+        messageDiv.innerHTML = `<span style="color:orange">⚠️ Guard already exists!</span>`;
         document.getElementById('newGuardName').value = duplicateCheck.isDuplicate.name;
         document.getElementById('newGuardEmail').value = duplicateCheck.isDuplicate.email;
         document.getElementById('newGuardGate').value = duplicateCheck.isDuplicate.gate;
         return;
     }
     
-    // Create new guard if no duplicate
     users.guards.push({ 
         id: badge.toUpperCase(), 
         name: name, 
@@ -696,7 +706,6 @@ function registerGuard() {
     
     messageDiv.innerHTML = '<span style="color:green">✅ Guard registered successfully!</span>';
     
-    // Clear form
     document.getElementById('newGuardBadge').value = '';
     document.getElementById('newGuardName').value = '';
     document.getElementById('newGuardEmail').value = '';
@@ -705,21 +714,38 @@ function registerGuard() {
     renderGuardsTable();
 }
 
-// ========== REGISTER ASSET ==========
+// ========== REGISTER ASSET (WITH BARCODE & SERIAL DUPLICATE CHECK) ==========
 function registerAsset() {
     const barcodeId = document.getElementById('newAssetBarcode').value;
     const assetType = document.getElementById('newAssetType').value;
     const serialNumber = document.getElementById('newAssetSerial').value;
     const studentId = document.getElementById('assetStudentId').value;
+    const messageDiv = document.getElementById('assetRegMessage');
     
     if (!barcodeId || !studentId) {
-        document.getElementById('assetRegMessage').innerHTML = '<span style="color:red">Fill barcode and select student</span>';
+        messageDiv.innerHTML = '<span style="color:red">❌ Fill barcode and select student</span>';
         return;
+    }
+    
+    // Check for duplicate barcode
+    const barcodeCheck = checkDuplicateBarcode(barcodeId);
+    if (barcodeCheck.isDuplicate) {
+        messageDiv.innerHTML = `<span style="color:red">❌ ${barcodeCheck.message}</span>`;
+        return;
+    }
+    
+    // Check for duplicate serial number (if provided)
+    if (serialNumber && serialNumber !== 'N/A') {
+        const serialCheck = checkDuplicateSerialNumber(serialNumber);
+        if (serialCheck.isDuplicate) {
+            messageDiv.innerHTML = `<span style="color:red">❌ ${serialCheck.message}</span>`;
+            return;
+        }
     }
     
     const student = users.students.find(s => s.id === studentId);
     if (!student) {
-        document.getElementById('assetRegMessage').innerHTML = '<span style="color:red">Invalid student</span>';
+        messageDiv.innerHTML = '<span style="color:red">❌ Invalid student</span>';
         return;
     }
     
@@ -734,7 +760,7 @@ function registerAsset() {
     };
     assets.push(newAsset);
     
-    document.getElementById('assetRegMessage').innerHTML = `<span style="color:green">✓ Asset registered! Barcode: ${barcodeId.toUpperCase()}</span>`;
+    messageDiv.innerHTML = `<span style="color:green">✅ Asset registered! Barcode: ${barcodeId.toUpperCase()}</span>`;
     document.getElementById('newAssetBarcode').value = '';
     document.getElementById('newAssetSerial').value = '';
     renderAssetsTable();
@@ -773,7 +799,7 @@ function renderAssetsTable() {
         const student = users.students.find(s => s.id === a.student_id);
         return `
             <div class="table-row">
-                <div><strong>${a.barcode_id}</strong><br><small>${assetIcons[a.asset_type]} ${a.asset_type}</small><br><small>Owner: ${student?.name || 'Unknown'}</small></div>
+                <div><strong>${a.barcode_id}</strong><br><small>${assetIcons[a.asset_type]} ${a.asset_type}</small><br><small>Serial: ${a.serial_number}</small><br><small>Owner: ${student?.name || 'Unknown'}</small></div>
                 <button class="delete-btn" onclick="deleteAsset('${a.id}')">Delete</button>
             </div>
         `;
@@ -793,25 +819,6 @@ function renderGuardsTable() {
         <div class="table-row">
             <div><strong>${g.id}</strong><br><small>${g.name}</small><br><small>${g.gate}</small><br><small>📧 ${g.email}</small></div>
             <button class="delete-btn" onclick="deleteGuard('${g.id}')">Delete</button>
-        </div>
-    `).join('');
-}
-
-function renderAdminLogsTable() {
-    const container = document.getElementById('logsTable');
-    if (!container) return;
-    const filter = document.getElementById('logFilter')?.value || 'ALL';
-    let filtered = filter === 'ALL' ? auditLogs : auditLogs.filter(l => l.decision === filter);
-    
-    if (filtered.length === 0) {
-        container.innerHTML = '<div style="padding:20px;color:#94a3b8;text-align:center">No logs found</div>';
-        return;
-    }
-    
-    container.innerHTML = filtered.slice(0, 100).map(log => `
-        <div class="table-row">
-            <div><small>${new Date(log.timestamp).toLocaleString()}</small><br><strong>${log.student_name || 'Unknown'}</strong><br><small>${log.barcode_id_scanned} - ${log.asset_type || 'N/A'}</small></div>
-            <div><span class="history-chip chip-${log.decision.toLowerCase()}">${log.decision}</span><br><small>Guard: ${log.guard_id}</small></div>
         </div>
     `).join('');
 }
@@ -892,16 +899,7 @@ function deleteGuard(id) {
 }
 
 function filterStudents() { renderStudentsTable(); }
-function filterLogs() { renderAdminLogsTable(); }
 function filterScansByGuard() { renderGuardReports(); }
-
-function exportAllLogs() {
-    let csv = 'Timestamp,Guard ID,Student Name,Barcode,Asset Type,Decision,Gate\n';
-    auditLogs.forEach(l => {
-        csv += `${l.timestamp},${l.guard_id},${l.student_name || 'Unknown'},${l.barcode_id_scanned},${l.asset_type || 'N/A'},${l.decision},${l.gate_id}\n`;
-    });
-    downloadCSV(csv, `spass_logs_${Date.now()}.csv`);
-}
 
 // ========== GUARD FUNCTIONS ==========
 function loadGuardDashboard() {
@@ -1070,4 +1068,4 @@ loadOfflineQueue();
 loadPendingAlerts();
 
 console.log("Script loaded - Barcode scanning is ready!");
-console.log("Duplicate detection is active for Students and Guards!");
+console.log("Duplicate detection active for Students, Guards, and Assets!");
