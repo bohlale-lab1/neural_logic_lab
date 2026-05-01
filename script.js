@@ -20,18 +20,18 @@ const assetIcons = { 'LAPTOP': '💻', 'FRIDGE': '🧊', 'MICROWAVE': '🍿', 'O
 // ========== USERS ==========
 let users = {
     guards: [
-        { id: 'G001', name: 'John Doe', password: '1234', role: 'guard', gate: 'GATE_1', email: 'your_email@gmail.com' },
-        { id: 'G002', name: 'Jane Smith', password: '1234', role: 'guard', gate: 'GATE_2', email: 'your_email@gmail.com' }
+        { id: 'G001', name: 'John Doe', password: '1234', role: 'guard', gate: 'GATE_1', email: 'bohlaleramoloto@gmail.com' },
+        { id: 'G002', name: 'Jane Smith', password: '1234', role: 'guard', gate: 'GATE_2', email: 'bohlaleramoloto@gmail.com' }
     ],
     admins: [
         { id: 'A001', name: 'Admin User', password: '1234', role: 'admin', email: 'bohlaleramoloto@gmail.com' }
     ],
     students: [
-        { id: 'S001', student_number: 202394726, name: 'CN MALULEKE', password: '1234', accessibility: 'NONE', is_active: true, email: 'your_email@gmail.com' },
-        { id: 'S002', student_number: 202393020, name: 'BZ TWALA', password: '1234', accessibility: 'VISUAL_IMPAIRMENT', is_active: true, email: 'your_email@gmail.com' },
-        { id: 'S003', student_number: 240015914, name: 'TM SEKGOBELA', password: '1234', accessibility: 'NONE', is_active: true, email: 'your_email@gmail.com' },
-        { id: 'S004', student_number: 202247479, name: 'C SETE', password: '1234', accessibility: 'NONE', is_active: true, email: 'your_email@gmail.com' },
-        { id: 'S005', student_number: 240000760, name: 'CB RAMOLOTO', password: '1234', accessibility: 'NONE', is_active: true, email: 'your_email@gmail.com' }
+        { id: 'S001', student_number: 202394726, name: 'CN MALULEKE', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramolotogmail.com' },
+        { id: 'S002', student_number: 202393020, name: 'BZ TWALA', password: '1234', accessibility: 'VISUAL_IMPAIRMENT', is_active: true, email: 'bohlaleramoloto@gmail.com' },
+        { id: 'S003', student_number: 240015914, name: 'TM SEKGOBELA', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramoloto@gmail.com' },
+        { id: 'S004', student_number: 202247479, name: 'C SETE', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramoloto@gmail.com' },
+        { id: 'S005', student_number: 240000760, name: 'CB RAMOLOTO', password: '1234', accessibility: 'NONE', is_active: true, email: 'bohlaleramoloto@gmail.com' }
     ]
 };
 
@@ -412,7 +412,7 @@ async function sendResetPin() {
             time: new Date().toLocaleTimeString()
         };
         
-        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+        await emailjs.send(service_0nxc2qy, template_0y9wskc, templateParams);
         successDiv.innerHTML = `✓ Verification PIN sent to ${email}. Please check your inbox.`;
         successDiv.style.display = 'block';
         
