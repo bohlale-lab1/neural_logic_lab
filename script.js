@@ -1,10 +1,15 @@
-// ========== EMAILJS CONFIGURATION (YOUR CREDENTIALS) ==========
+// ========== COMPLETE WORKING SCRIPT.JS ==========
+console.log('Script loaded successfully!');
+
+// ========== EMAILJS CONFIGURATION ==========
 const EMAILJS_PUBLIC_KEY = "0ES007IZBpdCZsW6d";
 const EMAILJS_SERVICE_ID = "service_0nxc2qy";
 const EMAILJS_TEMPLATE_ID = "template_0y9wskc";
 
-// Initialize EmailJS
-emailjs.init(EMAILJS_PUBLIC_KEY);
+// Initialize EmailJS (will work once tracking prevention is disabled)
+if (typeof emailjs !== 'undefined') {
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+}
 
 // ========== DATA STORAGE ==========
 let currentUser = null;
@@ -29,16 +34,16 @@ const assetIcons = { 'LAPTOP': '💻', 'FRIDGE': '🧊', 'MICROWAVE': '🍿', 'O
 // ========== USERS DATABASE ==========
 let users = {
     guards: [
-        { id: 'G001', name: 'John Doe', password: '1234', role: 'guard', email: 'your_email@gmail.com' },
-        { id: 'G002', name: 'Jane Smith', password: '1234', role: 'guard', email: 'your_email@gmail.com' }
+        { id: 'G001', name: 'John Doe', password: '1234', role: 'guard', email: 'YOUR_EMAIL@gmail.com' },
+        { id: 'G002', name: 'Jane Smith', password: '1234', role: 'guard', email: 'YOUR_EMAIL@gmail.com' }
     ],
     admins: [
-        { id: 'A001', name: 'Admin User', password: '1234', role: 'admin', email: 'your_email@gmail.com' }
+        { id: 'A001', name: 'Admin User', password: '1234', role: 'admin', email: 'YOUR_EMAIL@gmail.com' }
     ],
     students: [
-        { id: 'S001', studentNumber: 202394726, name: 'CN MALULEKE', password: '1234', disability: 'NONE', active: true, email: 'your_email@gmail.com' },
-        { id: 'S002', studentNumber: 202393020, name: 'BZ TWALA', password: '1234', disability: 'VISUAL_IMPAIRMENT', active: true, email: 'your_email@gmail.com' },
-        { id: 'S003', studentNumber: 240015914, name: 'TM SEKGOBELA', password: '1234', disability: 'NONE', active: true, email: 'your_email@gmail.com' }
+        { id: 'S001', studentNumber: 202394726, name: 'CN MALULEKE', password: '1234', disability: 'NONE', active: true, email: 'YOUR_EMAIL@gmail.com' },
+        { id: 'S002', studentNumber: 202393020, name: 'BZ TWALA', password: '1234', disability: 'VISUAL_IMPAIRMENT', active: true, email: 'YOUR_EMAIL@gmail.com' },
+        { id: 'S003', studentNumber: 240015914, name: 'TM SEKGOBELA', password: '1234', disability: 'NONE', active: true, email: 'YOUR_EMAIL@gmail.com' }
     ]
 };
 
@@ -49,160 +54,179 @@ let assets = [
     { id: 'AST003', barcode: 'BAR003', type: 'MICROWAVE', serial: 'SN003', studentId: 'S003', studentName: 'TM SEKGOBELA', active: true }
 ];
 
-// ========== VOICE GUIDANCE (Only for Visually Impaired) ==========
+// ========== VOICE GUIDANCE ==========
 function speakText(text) {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = 'en-US';
         utterance.rate = 0.9;
-        utterance.pitch = 1.0;
         window.speechSynthesis.speak(utterance);
     }
 }
 
 // ========== SCREEN NAVIGATION ==========
 function showScreen(screenId) {
+    console.log('Showing screen:', screenId);
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });
-    document.getElementById(screenId).classList.add('active');
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) {
+        targetScreen.classList.add('active');
+    } else {
+        console.error('Screen not found:', screenId);
+    }
 }
 
 // ========== ROLE SELECTION ==========
 function selectRole(role) {
+    console.log('Role selected:', role);
     selectedRole = role;
-    document.getElementById('roleGuardBtn').classList.toggle('active', role === 'guard');
-    document.getElementById('roleAdminBtn').classList.toggle('active', role === 'admin');
+    const guardBtn = document.getElementById('roleGuardBtn');
+    const adminBtn = document.getElementById('roleAdminBtn');
+    if (guardBtn) guardBtn.classList.toggle('active', role === 'guard');
+    if (adminBtn) adminBtn.classList.toggle('active', role === 'admin');
     
     const usernameLabel = document.getElementById('usernameLabel');
-    if (role === 'guard') {
-        usernameLabel.textContent = 'Badge Number';
-        document.getElementById('username').placeholder = 'Enter your badge number (e.g., G001)';
-    } else {
-        usernameLabel.textContent = 'Admin Username';
-        document.getElementById('username').placeholder = 'Enter admin username (e.g., A001)';
+    if (usernameLabel) {
+        usernameLabel.textContent = role === 'guard' ? 'Badge Number' : 'Admin Username';
+    }
+    const usernameInput = document.getElementById('username');
+    if (usernameInput) {
+        usernameInput.placeholder = role === 'guard' ? 'Enter your badge number (e.g., G001)' : 'Enter admin username (e.g., A001)';
     }
 }
 
-// ========== LOGIN FUNCTION ==========
+// ========== LOGIN ==========
 function handleLogin() {
+    console.log('Login clicked, role:', selectedRole);
     const username = document.getElementById('username').value.trim();
     const password = document.getElementById('password').value;
     const errorDiv = document.getElementById('loginError');
     
-    errorDiv.style.display = 'none';
+    if (errorDiv) errorDiv.style.display = 'none';
     
     if (selectedRole === 'guard') {
         const guard = users.guards.find(g => g.id === username && g.password === password);
         if (guard) {
             currentUser = guard;
             currentRole = 'guard';
-            document.getElementById('guardNameDisplay').textContent = guard.name;
+            const nameDisplay = document.getElementById('guardNameDisplay');
+            if (nameDisplay) nameDisplay.textContent = guard.name;
             loadGuardDashboard();
             showScreen('guardScreen');
             updateGuardStats();
             renderGuardRecentScans();
         } else {
-            errorDiv.textContent = 'Invalid badge number or password';
-            errorDiv.style.display = 'block';
+            if (errorDiv) {
+                errorDiv.textContent = 'Invalid badge number or password';
+                errorDiv.style.display = 'block';
+            }
         }
     } else if (selectedRole === 'admin') {
         const admin = users.admins.find(a => a.id === username && a.password === password);
         if (admin) {
             currentUser = admin;
             currentRole = 'admin';
-            document.getElementById('adminNameDisplay').textContent = admin.name;
+            const nameDisplay = document.getElementById('adminNameDisplay');
+            if (nameDisplay) nameDisplay.textContent = admin.name;
             loadAdminDashboard();
             showScreen('adminScreen');
         } else {
-            errorDiv.textContent = 'Invalid username or password';
-            errorDiv.style.display = 'block';
+            if (errorDiv) {
+                errorDiv.textContent = 'Invalid username or password';
+                errorDiv.style.display = 'block';
+            }
         }
     }
 }
 
 // ========== LOGOUT ==========
 function handleLogout() {
+    console.log('Logout clicked');
     stopCamera();
     currentUser = null;
     currentRole = null;
     showScreen('loginScreen');
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    if (usernameInput) usernameInput.value = '';
+    if (passwordInput) passwordInput.value = '';
 }
 
 // ========== BACK TO LOGIN ==========
 function backToLogin() {
     showScreen('loginScreen');
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-    document.getElementById('loginError').style.display = 'none';
 }
 
-// ========== FORGOT PASSWORD - STEP 1: SHOW SCREEN ==========
+// ========== FORGOT PASSWORD ==========
 function showForgotPassword() {
-    document.getElementById('step1Container').style.display = 'block';
-    document.getElementById('step2Container').style.display = 'none';
-    document.getElementById('step3Container').style.display = 'none';
-    document.getElementById('resetError').style.display = 'none';
-    document.getElementById('resetSuccess').style.display = 'none';
-    document.getElementById('resetEmail').value = '';
-    document.getElementById('resetUsername').value = '';
-    document.getElementById('resetPasswordCode').value = '';
-    document.getElementById('newPassword').value = '';
-    document.getElementById('confirmPassword').value = '';
+    console.log('Show forgot password');
+    const step1 = document.getElementById('step1Container');
+    const step2 = document.getElementById('step2Container');
+    const step3 = document.getElementById('step3Container');
+    const resetError = document.getElementById('resetError');
+    const resetSuccess = document.getElementById('resetSuccess');
+    
+    if (step1) step1.style.display = 'block';
+    if (step2) step2.style.display = 'none';
+    if (step3) step3.style.display = 'none';
+    if (resetError) resetError.style.display = 'none';
+    if (resetSuccess) resetSuccess.style.display = 'none';
+    
+    const resetEmail = document.getElementById('resetEmail');
+    const resetUsername = document.getElementById('resetUsername');
+    const resetPasswordCode = document.getElementById('resetPasswordCode');
+    const newPassword = document.getElementById('newPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    
+    if (resetEmail) resetEmail.value = '';
+    if (resetUsername) resetUsername.value = '';
+    if (resetPasswordCode) resetPasswordCode.value = '';
+    if (newPassword) newPassword.value = '';
+    if (confirmPassword) confirmPassword.value = '';
+    
     showScreen('forgotPasswordScreen');
 }
 
-// ========== FORGOT PASSWORD - STEP 2: SEND EMAIL ==========
 function sendResetEmail() {
+    console.log('Send reset email clicked');
     const email = document.getElementById('resetEmail').value.trim();
     const username = document.getElementById('resetUsername').value.trim();
     const errorDiv = document.getElementById('resetError');
     const successDiv = document.getElementById('resetSuccess');
     
-    errorDiv.style.display = 'none';
-    successDiv.style.display = 'none';
+    if (errorDiv) errorDiv.style.display = 'none';
+    if (successDiv) successDiv.style.display = 'none';
     
-    // Find user by username/email
     let foundUser = null;
     let userType = null;
     
-    // Check guards
     let user = users.guards.find(g => g.id === username && g.email === email);
     if (user) { foundUser = user; userType = 'guard'; }
     
-    // Check admins
     if (!foundUser) {
         user = users.admins.find(a => a.id === username && a.email === email);
         if (user) { foundUser = user; userType = 'admin'; }
     }
     
-    // Check students
     if (!foundUser) {
         user = users.students.find(s => (s.id === username || s.studentNumber.toString() === username) && s.email === email);
         if (user) { foundUser = user; userType = 'student'; }
     }
     
     if (!foundUser) {
-        errorDiv.textContent = 'No account found with these credentials';
-        errorDiv.style.display = 'block';
+        if (errorDiv) {
+            errorDiv.textContent = 'No account found with these credentials';
+            errorDiv.style.display = 'block';
+        }
         return;
     }
     
-    // Generate random temporary password
     const tempPassword = Math.random().toString(36).slice(-8);
+    pendingReset = { username: username, email: email, tempPassword: tempPassword, userType: userType };
     
-    // Store reset info
-    pendingReset = {
-        username: username,
-        email: email,
-        tempPassword: tempPassword,
-        userType: userType
-    };
-    
-    // Send email via EmailJS
     const templateParams = {
         to_email: email,
         to_name: foundUser.name,
@@ -210,65 +234,85 @@ function sendResetEmail() {
         time: new Date().toLocaleString()
     };
     
-    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-        .then(() => {
-            successDiv.innerHTML = `✓ A new temporary password has been sent to ${email}. Please check your inbox.`;
+    if (typeof emailjs !== 'undefined') {
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+            .then(() => {
+                if (successDiv) {
+                    successDiv.innerHTML = `✓ A temporary password has been sent to ${email}`;
+                    successDiv.style.display = 'block';
+                }
+                const step1 = document.getElementById('step1Container');
+                const step2 = document.getElementById('step2Container');
+                if (step1) step1.style.display = 'none';
+                if (step2) step2.style.display = 'block';
+            })
+            .catch((error) => {
+                console.error('Email error:', error);
+                if (errorDiv) {
+                    errorDiv.innerHTML = 'Failed to send email. Your browser may be blocking EmailJS.';
+                    errorDiv.style.display = 'block';
+                }
+                // Show the temp password for demo purposes
+                if (successDiv) {
+                    successDiv.innerHTML = `⚠️ Email blocked. Demo password: ${tempPassword}`;
+                    successDiv.style.display = 'block';
+                }
+            });
+    } else {
+        // EmailJS not loaded - show password for demo
+        if (successDiv) {
+            successDiv.innerHTML = `⚠️ EmailJS not loaded. Demo password: ${tempPassword}`;
             successDiv.style.display = 'block';
-            
-            // Move to step 2
-            document.getElementById('step1Container').style.display = 'none';
-            document.getElementById('step2Container').style.display = 'block';
-            document.getElementById('resetPasswordCode').value = '';
-        })
-        .catch((error) => {
-            console.error('Email error:', error);
-            errorDiv.innerHTML = 'Failed to send email. Please check your EmailJS setup.';
-            errorDiv.style.display = 'block';
-        });
+        }
+    }
 }
 
-// ========== FORGOT PASSWORD - STEP 3: VERIFY CODE ==========
 function verifyPasswordCode() {
+    console.log('Verify password code clicked');
     const enteredCode = document.getElementById('resetPasswordCode').value;
     const errorDiv = document.getElementById('resetError');
     
     if (enteredCode === pendingReset.tempPassword) {
-        // Code is correct - show password reset form
-        document.getElementById('step2Container').style.display = 'none';
-        document.getElementById('step3Container').style.display = 'block';
-        document.getElementById('resetPasswordCode').value = '';
-        errorDiv.style.display = 'none';
+        const step2 = document.getElementById('step2Container');
+        const step3 = document.getElementById('step3Container');
+        if (step2) step2.style.display = 'none';
+        if (step3) step3.style.display = 'block';
+        if (errorDiv) errorDiv.style.display = 'none';
     } else {
-        errorDiv.textContent = 'Invalid password code. Please check your email and try again.';
-        errorDiv.style.display = 'block';
+        if (errorDiv) {
+            errorDiv.textContent = 'Invalid password code. Please try again.';
+            errorDiv.style.display = 'block';
+        }
     }
 }
 
-// ========== FORGOT PASSWORD - STEP 4: UPDATE PASSWORD ==========
 function updatePassword() {
+    console.log('Update password clicked');
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
     const errorDiv = document.getElementById('resetError');
     const successDiv = document.getElementById('resetSuccess');
     
-    errorDiv.style.display = 'none';
-    successDiv.style.display = 'none';
+    if (errorDiv) errorDiv.style.display = 'none';
+    if (successDiv) successDiv.style.display = 'none';
     
     if (newPassword !== confirmPassword) {
-        errorDiv.textContent = 'Passwords do not match';
-        errorDiv.style.display = 'block';
+        if (errorDiv) {
+            errorDiv.textContent = 'Passwords do not match';
+            errorDiv.style.display = 'block';
+        }
         return;
     }
     
     if (newPassword.length < 4) {
-        errorDiv.textContent = 'Password must be at least 4 characters';
-        errorDiv.style.display = 'block';
+        if (errorDiv) {
+            errorDiv.textContent = 'Password must be at least 4 characters';
+            errorDiv.style.display = 'block';
+        }
         return;
     }
     
     let found = false;
-    
-    // Update password based on user type
     if (pendingReset.userType === 'guard') {
         const index = users.guards.findIndex(g => g.id === pendingReset.username);
         if (index !== -1) {
@@ -290,19 +334,12 @@ function updatePassword() {
     }
     
     if (found) {
-        successDiv.textContent = 'Password updated successfully! Please login with your new password.';
-        successDiv.style.display = 'block';
-        
-        // Clear reset data
+        if (successDiv) {
+            successDiv.textContent = 'Password updated successfully! Please login.';
+            successDiv.style.display = 'block';
+        }
         pendingReset = { username: null, email: null, tempPassword: null, userType: null };
-        
-        // Return to login after 2 seconds
-        setTimeout(() => {
-            backToLogin();
-        }, 2000);
-    } else {
-        errorDiv.textContent = 'Error updating password. Please try again.';
-        errorDiv.style.display = 'block';
+        setTimeout(() => backToLogin(), 2000);
     }
 }
 
@@ -399,14 +436,6 @@ function manualScan() {
 async function processScan(barcodeId) {
     stopCamera();
     
-    if (!navigator.onLine) {
-        offlineQueue.push({ id: Date.now(), barcode_id: barcodeId, timestamp: new Date().toISOString() });
-        saveOfflineQueue();
-        updateOfflineBanner();
-        showResult({ decision: 'OFFLINE', subtext: 'Scan Saved', message: 'No network. Will sync when online.', colour: 'amber' });
-        return;
-    }
-    
     const asset = assets.find(a => a.barcode === barcodeId);
     let decision, colour, message, studentInfo = null;
     
@@ -426,7 +455,6 @@ async function processScan(barcodeId) {
             message = `Exit Authorised for ${student.name}`;
             studentInfo = { ...asset, studentName: student.name, studentNumber: student.studentNumber };
             
-            // Voice guidance ONLY for visually impaired students
             if (student.disability === 'VISUAL_IMPAIRMENT') {
                 speakText(`Authorised. ${student.name}, your ${asset.type} has been verified. Exit permitted.`);
             }
@@ -436,7 +464,6 @@ async function processScan(barcodeId) {
             message = 'Asset ownership mismatch. Admin verification required.';
             studentInfo = asset;
             
-            // Create alert for admin
             const newAlert = {
                 id: Date.now(),
                 scanId: Date.now(),
@@ -456,7 +483,6 @@ async function processScan(barcodeId) {
         }
     }
     
-    // Create audit log entry
     const logEntry = {
         id: Date.now(),
         timestamp: new Date().toISOString(),
@@ -482,7 +508,7 @@ async function processScan(barcodeId) {
 
 function showResult(data) {
     const container = document.getElementById('resultContainer');
-    const icon = data.decision === 'AUTHORISED' ? '✓' : (data.decision === 'FLAGGED' ? '△' : (data.decision === 'OFFLINE' ? '📱' : '✗'));
+    const icon = data.decision === 'AUTHORISED' ? '✓' : (data.decision === 'FLAGGED' ? '△' : '✗');
     const assetIcon = assetIcons[data.assetType] || '📦';
     
     let html = `<div class="result-container ${data.colour}" style="min-height:700px">
@@ -799,7 +825,6 @@ function renderGuardReports() {
         else if (log.decision === 'DENIED') guardStats[log.guardId].denied++;
     });
     
-    // Populate guard filter dropdown
     const guardSelect = document.getElementById('guardFilter');
     if (guardSelect && (guardSelect.innerHTML === '<option value="ALL">All Guards</option>' || guardSelect.options.length <= 1)) {
         guardSelect.innerHTML = '<option value="ALL">All Guards</option>' + 
@@ -849,7 +874,6 @@ function approveAlert(alertId) {
     const alert = pendingAlerts.find(a => a.id === alertId);
     if (!alert) return;
     
-    // Add to audit log as authorised
     auditLogs.unshift({
         id: alert.scanId,
         timestamp: alert.timestamp,
@@ -861,7 +885,6 @@ function approveAlert(alertId) {
         wasApproved: true
     });
     
-    // Remove from pending alerts
     pendingAlerts = pendingAlerts.filter(a => a.id !== alertId);
     savePendingAlerts();
     saveAuditLogs();
@@ -876,7 +899,6 @@ function denyAlert(alertId) {
     const alert = pendingAlerts.find(a => a.id === alertId);
     if (!alert) return;
     
-    // Add to audit log as denied
     auditLogs.unshift({
         id: alert.scanId,
         timestamp: alert.timestamp,
@@ -888,7 +910,6 @@ function denyAlert(alertId) {
         wasDenied: true
     });
     
-    // Remove from pending alerts
     pendingAlerts = pendingAlerts.filter(a => a.id !== alertId);
     savePendingAlerts();
     saveAuditLogs();
@@ -912,7 +933,7 @@ function updateAlertBadge() {
     }
 }
 
-// ========== GUARD FUNCTIONS ==========
+// ========== GUARD DASHBOARD FUNCTIONS ==========
 function loadGuardDashboard() {
     updateGuardStats();
     renderGuardRecentScans();
@@ -1001,6 +1022,7 @@ window.addEventListener('online', () => { if(offlineQueue.length > 0 && currentU
 window.addEventListener('offline', () => alert('⚠️ Network disconnected. Scans will be saved offline.'));
 
 // ========== INITIALIZE ==========
+console.log('Script loaded successfully! All functions are defined.');
 loadAuditLogs();
 loadOfflineQueue();
 loadPendingAlerts();
