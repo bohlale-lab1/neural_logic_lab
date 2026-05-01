@@ -192,4 +192,24 @@ function registerAsset(){ let studentId=document.getElementById('assetStudentId'
 function renderAssetsTable(){ document.getElementById('assetsTable').innerHTML=assets.map(a=>{let s=users.students.find(s=>s.id===a.studentId); return `<div class="table-row"><div><strong>${a.barcode}</strong><br>${assetIcons[a.type]} ${a.type}<br>Owner: ${s?.name||'?'}</div><button class="delete-btn" onclick="deleteAsset('${a.id}')">Delete</button></div>`;}).join(''); }
 function registerGuard(){ users.guards.push({ id:document.getElementById('newGuardBadge').value.toUpperCase(), name:document.getElementById('newGuardName').value, password:document.getElementById('newGuardPassword').value, role:'guard', email:document.getElementById('newGuardEmail').value }); renderGuardsTable(); }
 function renderGuardsTable(){ document.getElementById('guardsTable').innerHTML=users.guards.map(g=>`<div class="table-row"><div><strong>${g.id}</strong><br>${g.name}<br>📧 ${g.email}</div><button class="delete-btn" onclick="deleteGuard('${g.id}')">Delete</button></div>`).join(''); }
-function renderGuardReports(){ let stats={}; auditLogs.forEach(l=>{ if(!stats[l.guardId]) stats[l.guardId]={total:0,authorised:0,flagged:0,denied:0}; stats[l.guardId].total++; if(l.decision==='AUTHORIS
+function renderGuardReports(){ let stats={}; auditLogs.forEach(l=>{ if(!stats[l.guardId]) stats[l.guardId]={total:0,authorised:0,flagged:0,denied:0}; stats[l.guardId].total++; if(l.decision==='AUTHORISED') stats[l.guardId].authorised++; else if(l.decision==='FLAGGED') stats[l.guardId].flagged++; else if(l.decision==='DENIED') stats[l.guardId].denied++; }); document.getElementById('guardReportsTable').innerHTML=Object.entries(stats).map(([id,s])=>`<div class="table-row"><div><strong>Guard ${id}</strong></div><div>Total ${s.total} | ✅ ${s.authorised} | ⚠️ ${s.flagged} | ❌ ${s.denied}</div></div>`).join('')||'<div style="padding:20px;text-align:center">No reports</div>'; }
+function populateStudentDropdown(){ let select=document.getElementById('assetStudentId'); select.innerHTML='<option value="">-- Student --</option>'+users.students.map(s=>`<option value="${s.id}">${s.studentNumber} - ${s.name}</option>`).join(''); }
+function deleteStudent(id){ users.students=users.students.filter(s=>s.id!==id); assets=assets.filter(a=>a.studentId!==id); renderStudentsTable(); renderAssetsTable(); populateStudentDropdown(); updateAdminStats(); }
+function deleteAsset(id){ assets=assets.filter(a=>a.id!==id); renderAssetsTable(); updateAdminStats(); }
+function deleteGuard(id){ users.guards=users.guards.filter(g=>g.id!==id); renderGuardsTable(); }
+function filterStudents(){ renderStudentsTable(); }
+function filterScansByGuard(){ renderGuardReports(); }
+function backToGuardDashboard(){ showScreen('guardScreen'); }
+function alertSupervisor(){ alert('🚨 Supervisor notified'); }
+function saveAuditLogs(){ localStorage.setItem('spass_logs',JSON.stringify(auditLogs)); }
+function savePendingAlerts(){ localStorage.setItem('spass_alerts',JSON.stringify(pendingAlerts)); }
+function loadAuditLogs(){ let saved=localStorage.getItem('spass_logs'); if(saved) auditLogs=JSON.parse(saved); }
+function loadPendingAlerts(){ let saved=localStorage.getItem('spass_alerts'); if(saved) pendingAlerts=JSON.parse(saved); updateAlertBadge(); }
+function syncOfflineQueue(){ alert('Sync placeholder'); }
+function updateOfflineBanner(){}
+function showScreen(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function backToLogin(){ showScreen('loginScreen'); }
+function handleLogout(){ stopCamera(); showScreen('loginScreen'); }
+
+loadAuditLogs();
+loadPendingAlerts();
