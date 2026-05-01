@@ -22,7 +22,6 @@ body {
     border-radius: 32px;
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-    position: relative;
 }
 
 .screen {
@@ -54,7 +53,6 @@ body {
 .shield-icon {
     font-size: 60px;
     margin-bottom: 16px;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
 }
 
 .logo-text {
@@ -93,6 +91,7 @@ body {
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.3s;
 }
 
 .role-btn.active {
@@ -124,11 +123,13 @@ body {
     border: 2px solid #e2e8f0;
     border-radius: 12px;
     font-size: 15px;
+    transition: all 0.3s;
 }
 
 .input:focus {
     outline: none;
     border-color: #1a4a6f;
+    box-shadow: 0 0 0 3px rgba(26,74,111,0.1);
 }
 
 .btn-login {
@@ -141,6 +142,11 @@ body {
     font-size: 16px;
     font-weight: 700;
     cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
 }
 
 .btn-secondary {
@@ -164,6 +170,7 @@ body {
     color: #1a4a6f;
     text-decoration: none;
     font-size: 13px;
+    font-weight: 500;
 }
 
 .security-badge {
@@ -238,15 +245,6 @@ body {
     margin-right: 16px;
 }
 
-.gate-badge {
-    background: #2E75B6;
-    color: white;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    margin-right: 12px;
-}
-
 .logout-icon {
     background: rgba(255,255,255,0.2);
     border: none;
@@ -275,6 +273,7 @@ body {
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.2s;
 }
 
 .tab-btn.active {
@@ -309,6 +308,7 @@ body {
     padding: 20px;
     border-radius: 16px;
     text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .stat-icon {
@@ -337,6 +337,7 @@ body {
     border-radius: 20px;
     padding: 20px;
     margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .section-title {
@@ -386,6 +387,10 @@ body {
     border-bottom: 1px solid #e2e8f0;
 }
 
+.table-row:hover {
+    background: #f8fafc;
+}
+
 .delete-btn {
     background: #ef4444;
     color: white;
@@ -428,6 +433,7 @@ body {
     padding: 14px;
     border-radius: 14px;
     text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 .btn-scan-large {
@@ -440,6 +446,23 @@ body {
     border-radius: 16px;
     font-size: 18px;
     font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.btn-scan-large:hover {
+    transform: scale(1.02);
+}
+
+.btn-history {
+    width: 100%;
+    padding: 14px;
+    background: #e2e8f0;
+    color: #1a4a6f;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    margin-top: 12px;
     cursor: pointer;
 }
 
@@ -486,6 +509,7 @@ body {
     border: 2px solid #2E75B6;
     border-radius: 16px;
     position: relative;
+    background: transparent;
 }
 
 .scan-line-real {
@@ -496,6 +520,7 @@ body {
     height: 2px;
     background: #2E75B6;
     animation: scanReal 2s linear infinite;
+    box-shadow: 0 0 10px #2E75B6;
 }
 
 @keyframes scanReal {
@@ -595,6 +620,7 @@ body {
     padding: 20px;
     width: 100%;
     margin: 20px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 .result-student-name {
@@ -649,6 +675,7 @@ body {
     margin-bottom: 12px;
     display: flex;
     align-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 .history-border {
@@ -692,12 +719,6 @@ body {
 .chip-green { background: #10b98120; color: #059669; }
 .chip-amber { background: #f59e0b20; color: #d97706; }
 .chip-red { background: #ef444420; color: #dc2626; }
-
-.filter-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
 
 .offline-banner {
     margin: 8px 16px;
@@ -771,4 +792,10 @@ body {
 .reg-message {
     margin-top: 10px;
     font-size: 13px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
 }
