@@ -34,16 +34,16 @@ const assetIcons = { 'LAPTOP': '💻', 'FRIDGE': '🧊', 'MICROWAVE': '🍿', 'O
 // ========== USERS DATABASE ==========
 let users = {
     guards: [
-        { id: 'G001', name: 'John Doe', password: '1234', role: 'guard', email: 'YOUR_EMAIL@gmail.com' },
-        { id: 'G002', name: 'Jane Smith', password: '1234', role: 'guard', email: 'YOUR_EMAIL@gmail.com' }
+        { id: 'G001', name: 'John Doe', password: '1234', role: 'guard', email: 'bohlaleramoloto@gmail.com' },
+        { id: 'G002', name: 'Jane Smith', password: '1234', role: 'guard', email: 'bohlaleramoloto@gmail.com'' }
     ],
     admins: [
-        { id: 'A001', name: 'Admin User', password: '1234', role: 'admin', email: 'YOUR_EMAIL@gmail.com' }
+        { id: 'A001', name: 'Admin User', password: '1234', role: 'admin', email: 'bohlaleramoloto@gmail.com'' }
     ],
     students: [
-        { id: 'S001', studentNumber: 202394726, name: 'CN MALULEKE', password: '1234', disability: 'NONE', active: true, email: 'YOUR_EMAIL@gmail.com' },
-        { id: 'S002', studentNumber: 202393020, name: 'BZ TWALA', password: '1234', disability: 'VISUAL_IMPAIRMENT', active: true, email: 'YOUR_EMAIL@gmail.com' },
-        { id: 'S003', studentNumber: 240015914, name: 'TM SEKGOBELA', password: '1234', disability: 'NONE', active: true, email: 'YOUR_EMAIL@gmail.com' }
+        { id: 'S001', studentNumber: 202394726, name: 'CN MALULEKE', password: '1234', disability: 'NONE', active: true, email: 'bohlaleramoloto@gmail.com'' },
+        { id: 'S002', studentNumber: 202393020, name: 'BZ TWALA', password: '1234', disability: 'VISUAL_IMPAIRMENT', active: true, email: 'bohlaleramoloto@gmail.com'' },
+        { id: 'S003', studentNumber: 240015914, name: 'TM SEKGOBELA', password: '1234', disability: 'NONE', active: true, email: 'bohlaleramoloto@gmail.com'' }
     ]
 };
 
